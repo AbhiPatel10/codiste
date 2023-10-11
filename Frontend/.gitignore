@@ -1,0 +1,18 @@
+# Ignore system-specific temporary files
+.DS_Store
+Thumbs.db
+
+# Ignore editor-specific files
+.vscode/
+.idea/
+
+# Ignore build artifacts
+build/
+dist/
+*.pyc
+
+# Ignore environment-specific files
+# .env
+/node_modules
+/build
+.next/
