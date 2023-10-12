@@ -1,8 +1,12 @@
+import Dashboard from "./components/dashboard";
+import "../styles/global.css"
+import Navbar from "./components/navbar";
 
 export default function Home() {
   return (
     <main>
-      <h1>Codiste</h1>
+      <Navbar/>
+      <Dashboard />
     </main>
   );
 }
