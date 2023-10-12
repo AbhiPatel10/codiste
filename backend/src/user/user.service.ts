@@ -30,13 +30,14 @@ export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
-
+  async findOneByEmail(user: User): Promise<any> {
+    const findUser = await this.userModel.findOne({ email: user.email }).exec();
+    return findUser;
+  }
   async create(user: User): Promise<User> {
     await UserValidation(user);
     // Check if the email is already in use
-    const existingUser = await this.userModel
-      .findOne({ email: user.email })
-      .exec();
+    const existingUser = await this.findOneByEmail(user);
     if (existingUser) {
       throw new ConflictException('Email is already in use');
     }
