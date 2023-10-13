@@ -9,6 +9,7 @@ import { User } from './user.schema';
 import * as Joi from 'joi';
 import { ResponseService } from '../common/global-exception.filter';
 import { encodePassword } from '../utils/bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 const UserValidation = (user: User) => {
   // Joi schema for validation
@@ -30,8 +31,9 @@ const UserValidation = (user: User) => {
 @Injectable()
 export class UserService {
   constructor(
-    private readonly responseService: ResponseService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly responseService: ResponseService,
+    private readonly jwtService: JwtService,
   ) {}
   async findOneByEmail(email: string): Promise<User> {
     const findUser = await this.userModel.findOne({ email: email }).exec();
@@ -65,15 +67,27 @@ export class UserService {
   }
 
   async update(id: string, userData: User): Promise<User> {
+    let updateddata: any;
     if (!Types.ObjectId.isValid(id)) {
       // Handle invalid ObjectId error
       throw new ConflictException('Invalid ObjectId format');
     }
     await UserValidation(userData);
+    const findUser = await this.userModel.findOne({ _id: id }).exec();
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(id, userData, {
-      new: true,
-    });
+    if (findUser.password != userData.password) {
+      const password = await encodePassword(userData.password);
+      updateddata = { ...userData, password };
+    } else {
+      updateddata = userData;
+    }
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      id,
+      updateddata,
+      {
+        new: true,
+      },
+    );
     if (!updatedUser) throw new NotFoundException('User not found');
     return this.responseService.responseHandler(
       200,
@@ -95,12 +109,12 @@ export class UserService {
       deletedUser,
     );
   }
-  async getProfile(id: string): Promise<User> {
-    if (!Types.ObjectId.isValid(id)) {
-      // Handle invalid ObjectId error
-      throw new ConflictException('Invalid ObjectId format');
-    }
-    const user = await this.userModel.findById(id);
+  async getProfile(authToken: string): Promise<User> {
+    // Verify the JWT token
+    const decodedToken = await this.jwtService.verify(authToken);
+    // Extract the user id from the token
+    const userId = decodedToken.sub;
+    const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
     return this.responseService.responseHandler(

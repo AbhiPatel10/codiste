@@ -19,7 +19,7 @@ const Dashboard = () => {
     try {
       dispatch(getUsersRequest());
       const data = await fetchUsers();
-      dispatch(getUsersSuccess(data.data));
+      dispatch(getUsersSuccess(data?.data));
     } catch (error) {
       dispatch(getUsersFailure(error.message));
     }

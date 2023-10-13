@@ -6,6 +6,7 @@ import {
   Post,
   Put,
   Delete,
+  Headers,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.schema';
@@ -34,8 +35,8 @@ export class UserController {
     return await this.userService.delete(id);
   }
 
-  @Get('profile/:id')
-  async Profile(@Param('id') id: string): Promise<User> {
-    return await this.userService.getProfile(id);
+  @Get('profile')
+  async Profile(@Headers('Authorization') authToken: string): Promise<User> {
+    return await this.userService.getProfile(authToken);
   }
 }
