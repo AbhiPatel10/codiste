@@ -11,6 +11,7 @@ import {
   deleteUserFailure,
 } from "../../../GlobalRedux/Features/user/userSlice";
 import { getUsers as fetchUsers, deleteUser } from "../../../api";
+import HashLoader from "react-spinners/HashLoader";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -26,26 +27,35 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-
     fetchUserData();
   }, [dispatch]);
 
   const DeletUser = async (userId) => {
-    try{
+    try {
       dispatch(deleteUserRequest());
 
       await deleteUser(userId);
       fetchUserData();
       dispatch(deleteUserSuccess());
-    }catch(error){
-      alert(error)
+    } catch (error) {
+      alert(error);
       dispatch(deleteUserFailure(error.message));
     }
   };
 
   return (
     <>
-      {usersData.loading && <p>Loading....</p>}
+      {usersData.loading && (
+        <div className="flex h-screen items-center justify-center ">
+          <HashLoader
+            loading={usersData.loading}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+            color={"#8d06d6"}
+            size={68}
+          />
+        </div>
+      )}
       <div className="flex flex-col">
         <div className="overflow-x-auto">
           <div className="inline-block w-full">
